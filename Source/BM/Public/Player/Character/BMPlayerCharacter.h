@@ -12,12 +12,14 @@ class BM_API ABMPlayerCharacter : public ABMBaseCharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ABMPlayerCharacter();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Animation")
+	UAnimInstance* LinkAnimInstance;
+	
 public:
 };
