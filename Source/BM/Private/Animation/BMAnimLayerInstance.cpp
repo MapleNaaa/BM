@@ -14,6 +14,15 @@ void UBMAnimLayerInstance::NativeInitializeAnimation()
 	BMAnimInstance = Cast<UBMAnimInstance>(OwningCharacter->GetMesh()->GetAnimInstance());
 }
 
+void UBMAnimLayerInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
+	if (!IsValid(BMAnimInstance)) return;
+
+	CurrentCharacterGate = BMAnimInstance->CurrentCharacterGate;
+	CurrentTurnType = BMAnimInstance->CharacterTurnType;
+}
+
 UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable)
 {
 	UObject* Result = UChooserFunctionLibrary::EvaluateChooser(this,ChooserTable, UAnimSequence::StaticClass());

@@ -2,6 +2,7 @@
 
 
 #include "Player/Character/BMPlayerCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 ABMPlayerCharacter::ABMPlayerCharacter()
@@ -13,4 +14,19 @@ void ABMPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ABMPlayerCharacter::SetCharacterGate(EBMCharacterGate NewGate)
+{
+	CurrentCharacterGate = NewGate;
+
+	FBMCharacterGateSetting* GateSetting = CharacterGateSettings.Find(NewGate);
+	if(GateSetting == nullptr) return;
+
+	GetCharacterMovement()->MaxWalkSpeed = GateSetting->MaxWalkSpeed;
+	GetCharacterMovement()->MaxAcceleration = GateSetting->MaxAcceleration;
+	GetCharacterMovement()->BrakingDecelerationWalking = GateSetting->BrakingDeceleration;
+	GetCharacterMovement()->BrakingFrictionFactor = GateSetting->BrakingFrictionFactor;
+	GetCharacterMovement()->BrakingFriction = GateSetting->BrakingFriction;
+	GetCharacterMovement()->bUseSeparateBrakingFriction = GateSetting->UseSeparateBrakingFriction;
 }

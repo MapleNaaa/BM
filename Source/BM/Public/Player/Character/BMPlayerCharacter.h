@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BMBaseCharacter.h"
+#include "ES/BMPlayerTypes.h"
 #include "BMPlayerCharacter.generated.h"
 
 UCLASS()
@@ -13,6 +14,9 @@ class BM_API ABMPlayerCharacter : public ABMBaseCharacter
 
 public:
 	ABMPlayerCharacter();
+	
+	virtual void SetCharacterGate(EBMCharacterGate NewGate);
+	EBMCharacterGate GetCharacterGate() const { return CurrentCharacterGate; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -20,6 +24,10 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Animation")
 	UAnimInstance* LinkAnimInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="BM|Gate")
+	EBMCharacterGate CurrentCharacterGate;
 	
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Gate")
+	TMap<EBMCharacterGate, FBMCharacterGateSetting> CharacterGateSettings;
 };

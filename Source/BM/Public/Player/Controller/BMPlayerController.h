@@ -62,6 +62,7 @@ protected:
 	UInputAction* InventoryAction;
 
 	bool bIsJogging = false;
+	bool LastIsJogging = false;
 #pragma endregion
 
 	

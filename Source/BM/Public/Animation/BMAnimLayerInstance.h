@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "Chooser.h"
 #include "Animation/AnimInstance.h"
-#include "Animation/ES/BMAnimationTypes.h"
+#include "ES/BMAnimationTypes.h"
+#include "ES/BMPlayerTypes.h"
 #include "BMAnimLayerInstance.generated.h"
 
 class UBMAnimInstance;
@@ -19,6 +20,7 @@ class BM_API UBMAnimLayerInstance : public UAnimInstance
 
 public:
 	virtual void NativeInitializeAnimation() override;
+	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category=Animation)
@@ -29,7 +31,13 @@ protected:
 	TObjectPtr<UBMAnimInstance> BMAnimInstance;
 	
 	UPROPERTY(BlueprintReadWrite, Category="BM")
-	EBMSMStage CurrentStage = EBMSMStage::Idle;
+	EBMSMStage CurrentSMStage = EBMSMStage::Idle;
+
+	UPROPERTY(BlueprintReadWrite, Category="BM")
+	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::None;
+
+	UPROPERTY(BlueprintReadWrite, Category="BM")
+	EBMTurnType CurrentTurnType = EBMTurnType::None;
 
 
 	// ~ Animation Chooser Tables

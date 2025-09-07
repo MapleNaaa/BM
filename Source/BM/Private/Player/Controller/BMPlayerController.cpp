@@ -4,7 +4,9 @@
 #include "Player/Controller/BMPlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "ES/BMPlayerTypes.h"
 #include "GameFramework/Character.h"
+#include "Player/Character/BMPlayerCharacter.h"
 
 void ABMPlayerController::BeginPlay()
 {
@@ -33,16 +35,16 @@ void ABMPlayerController::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
-	ACharacter* BMCharacter = GetCharacter();
+	ABMPlayerCharacter* BMCharacter = Cast<ABMPlayerCharacter>(GetCharacter());
 	if (!IsValid(BMCharacter)) return;
 
-	if (bIsJogging)
+	if (bIsJogging || LastIsJogging)
 	{
-		// Todo: Set Character Move Gate
+		BMCharacter->SetCharacterGate(EBMCharacterGate::Run);
 	}
 	else
 	{
-		
+		BMCharacter->SetCharacterGate(EBMCharacterGate::Walk);
 	}
 	bIsJogging = false;
 	
@@ -55,6 +57,7 @@ void ABMPlayerController::Move(const FInputActionValue& Value)
 
 void ABMPlayerController::Jog(const FInputActionValue& Value)
 {
+	LastIsJogging = bIsJogging;
 	bIsJogging = true;
 }
 
