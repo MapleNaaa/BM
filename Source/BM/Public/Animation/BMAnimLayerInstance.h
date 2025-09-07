@@ -34,7 +34,7 @@ protected:
 	EBMSMStage CurrentSMStage = EBMSMStage::Idle;
 
 	UPROPERTY(BlueprintReadWrite, Category="BM")
-	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::None;
+	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::Walk;
 
 	UPROPERTY(BlueprintReadWrite, Category="BM")
 	EBMTurnType CurrentTurnType = EBMTurnType::None;

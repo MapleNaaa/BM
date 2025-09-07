@@ -79,5 +79,22 @@ void UBMAnimInstance::UpdateCharacterTurn(float DeltaSeconds)
 	{
 		CharacterTurnType = EBMTurnType::Right;
 	}
+
+	LastTurnCurveYaw = CurrentTurnCurveYaw;
+	float CurrentTurnCurveStageValue = GetCurveValue(TurnCurveStageName);
+	UE_LOG(LogTemp, Error, TEXT("CurrentTurnCurveStageValue: %f"), CurrentTurnCurveStageValue);
+	if(CurrentTurnCurveStageValue < 0.1f)
+	{
+		LastTurnCurveYaw = 0.f;
+		CurrentTurnCurveYaw = 0.f;
+	}
+	else
+	{
+		CurrentTurnCurveYaw = CurrentTurnCurveStageValue > 0 ? GetCurveValue(TurnCurveYawName) : 0.f;
+		UE_LOG(LogTemp, Warning, TEXT("CurrentTurnCurveYaw: %f"), CurrentTurnCurveYaw);
+		if(LastTurnCurveYaw == 0.f) return;
+		RootYawOffset -= UKismetMathLibrary::NormalizeAxis(CurrentTurnCurveYaw - LastTurnCurveYaw);
+	}
+	RootYawOffset = 0.f;
 	
 }

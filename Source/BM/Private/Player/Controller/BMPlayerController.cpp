@@ -27,6 +27,7 @@ void ABMPlayerController::SetupInputComponent()
 	if (!IsValid(EnhancedInputComponent)) return;
 
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABMPlayerController::Move);
+	EnhancedInputComponent->BindAction(JogAction, ETriggerEvent::Triggered, this, &ABMPlayerController::Jog);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABMPlayerController::Look);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ABMPlayerController::Jump);
 }
@@ -47,9 +48,11 @@ void ABMPlayerController::Move(const FInputActionValue& Value)
 		BMCharacter->SetCharacterGate(EBMCharacterGate::Walk);
 	}
 	bIsJogging = false;
-	
-	const FVector ForwardDirection = BMCharacter->GetActorForwardVector();
-	const FVector RightDirection = BMCharacter->GetActorRightVector();
+
+	const FRotator ControlRot = GetControlRotation();
+	const FRotator YawControlRot(0.f, ControlRot.Yaw, 0.f);
+	const FVector ForwardDirection = FRotationMatrix(YawControlRot).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawControlRot).GetUnitAxis(EAxis::Y);
 
 	BMCharacter->AddMovementInput(ForwardDirection, MovementVector.Y);
 	BMCharacter->AddMovementInput(RightDirection, MovementVector.X);

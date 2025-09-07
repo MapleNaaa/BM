@@ -49,6 +49,9 @@ enum class EDebugAnimIndex : uint8
     CharacterTurnType = 21,
     RootYawOffset = 22,
 
+    // State
+    CharacterGate = 41,
+
     // Other
     GlobalTimeDilation = 221,
     

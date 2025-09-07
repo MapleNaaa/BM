@@ -19,6 +19,11 @@ void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
 		DebugMessage = FString::Printf(TEXT("Movement State: %s"), *UEnum::GetValueAsString(CurrentMovementState));
 		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterMovementState), 5.f, FColor::Green, DebugMessage);
 	}*/
+	if (DebugAnim::bShowState)
+	{
+		DebugMessage = FString::Printf(TEXT("State: %s"), *UEnum::GetValueAsString(AnimInstance->CurrentCharacterGate));
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterGate), 5.f, FColor::Green, DebugMessage);
+	}
 
 	if (DebugAnim::bShowVelocity)
 	{

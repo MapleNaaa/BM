@@ -7,6 +7,8 @@
 #include "ES/BMPlayerTypes.h"
 #include "BMPlayerCharacter.generated.h"
 
+class UBMAnimLayerInstance;
+
 UCLASS()
 class BM_API ABMPlayerCharacter : public ABMBaseCharacter
 {
@@ -23,10 +25,10 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Animation")
-	UAnimInstance* LinkAnimInstance;
+	TObjectPtr<UBMAnimLayerInstance> LinkAnimInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="BM|Gate")
-	EBMCharacterGate CurrentCharacterGate;
+	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::Walk;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Gate")
 	TMap<EBMCharacterGate, FBMCharacterGateSetting> CharacterGateSettings;

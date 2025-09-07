@@ -18,16 +18,18 @@ namespace DebugAnim
 	static bool bShowDebug = false;
 	static bool bShowVelocity = false;
 	static bool bShowTurn = false;
+	static bool bShowState = false;
 
 	static FAutoConsoleCommand CVarShowDebug(
 		TEXT("DebugAnim.bShowDebug"),
-		TEXT("Show the debug information in the top left corner of the screen. use [1/0]."),
-		FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& InArgs)
+		TEXT("Show the debug information in the top left corner of the screen. use"),
+		FConsoleCommandDelegate::CreateLambda([]()
 		{
-			bShowDebug = FCString::Atoi(*InArgs[0]) == 1;
+			bShowDebug = !bShowDebug;
 			
 			bShowVelocity = bShowDebug;
 			bShowTurn = bShowDebug;
+			bShowState = bShowDebug;
 		})
 	);
 
@@ -42,6 +44,13 @@ namespace DebugAnim
 		TEXT("DebugAnim.bShowTurn"),
 		bShowTurn,
 		TEXT("Show the current character turn in the top left corner of the screen. use [true/false]."),
+		ECVF_Default
+	);
+
+	static FAutoConsoleVariableRef CVarShowState(
+		TEXT("DebugAnim.bShowState"),
+		bShowState,
+		TEXT("Show the current character state in the top left corner of the screen. use [true/false]."),
 		ECVF_Default
 	);
 }

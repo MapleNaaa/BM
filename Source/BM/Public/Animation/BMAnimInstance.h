@@ -45,6 +45,8 @@ protected:
 
 	// ~ Turn
 	float LastCharacterYaw = 0.0f;
+	float LastTurnCurveYaw = 0.0f;
+	float CurrentTurnCurveYaw = 0.0f;
 	FFloatSpringState RootYawOffsetSpring;
 	
 	UPROPERTY(BlueprintReadWrite, Category="State")
@@ -54,6 +56,11 @@ protected:
 	float BackAngle = 160.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
 	float FrontAngle = 90.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
+	FName TurnCurveStageName;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
+	FName TurnCurveYawName;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Turn")
 	float RootYawOffset = 0.0f;
