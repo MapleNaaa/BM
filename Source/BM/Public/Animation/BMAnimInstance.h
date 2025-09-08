@@ -32,6 +32,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="State")
 	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::None;
 
+	// ~ Transform
+	UPROPERTY(BlueprintReadOnly, Category="Transform")
+	FRotator CharacterRotation = FRotator::ZeroRotator;
+	// ~ End Transform
+
 	// ~ Speed
 	UPROPERTY(BlueprintReadOnly, Category="Velocity")
 	float CharacterSpeed = 0.0f;
@@ -67,6 +72,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category="Turn")
 	EBMTurnType CharacterTurnType = EBMTurnType::None;
+
+	UPROPERTY(BlueprintReadOnly, Category="Turn")
+	float AbsMaxTurnYawValue = 0.0f;
+	
 	// ~ End Turn
 
 

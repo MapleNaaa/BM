@@ -23,6 +23,11 @@ void UBMAnimLayerInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	CurrentTurnType = BMAnimInstance->CharacterTurnType;
 }
 
+void UBMAnimLayerInstance::ModifyRootMotionTransform(FTransform& RootMotion)
+{
+	
+}
+
 UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable)
 {
 	UObject* Result = UChooserFunctionLibrary::EvaluateChooser(this,ChooserTable, UAnimSequence::StaticClass());
@@ -32,4 +37,18 @@ UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTab
 		return nullptr;
 	}
 	return Cast<UAnimSequence>(Result);
+
 }
+
+void UBMAnimLayerInstance::PlayMontageInBM(UAnimMontage* Montage)
+{
+	// MontagePlayer->PlayMontage(Montage);
+	// Montage
+	Montage_Play(Montage);
+}
+
+void UBMAnimLayerInstance::NativePostEvaluateAnimation()
+{
+	Super::NativePostEvaluateAnimation();
+}
+

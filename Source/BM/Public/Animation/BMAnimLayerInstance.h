@@ -22,9 +22,19 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
+	UPROPERTY(BlueprintReadOnly, Category="BM")
+	FTransform RootMotionCached;
+	
+	void ModifyRootMotionTransform(FTransform& RootMotion);
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category=Animation)
 	UAnimSequence* GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable);
+
+	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe), Category=Animation)
+	void PlayMontageInBM(UAnimMontage* Montage);
+
+	virtual void NativePostEvaluateAnimation() override;
 	
 protected:
 	UPROPERTY(BlueprintReadWrite, Category="BM")

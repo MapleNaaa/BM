@@ -14,6 +14,7 @@ class BM_API ABMBaseCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ABMBaseCharacter();
+	ABMBaseCharacter(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	// Called when the game starts or when spawned

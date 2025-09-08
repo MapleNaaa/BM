@@ -19,19 +19,20 @@ void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
 		DebugMessage = FString::Printf(TEXT("Movement State: %s"), *UEnum::GetValueAsString(CurrentMovementState));
 		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterMovementState), 5.f, FColor::Green, DebugMessage);
 	}*/
+	// UE_LOG(LogTemp, Warning, TEXT("AnimDebug Params : bShowState: %d , bShowVelocity: %d , bShowTurn %d"), DebugAnim::bShowState, DebugAnim::bShowVelocity, DebugAnim::bShowTurn);
 	if (DebugAnim::bShowState)
 	{
 		DebugMessage = FString::Printf(TEXT("State: %s"), *UEnum::GetValueAsString(AnimInstance->CurrentCharacterGate));
-		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterGate), 5.f, FColor::Green, DebugMessage);
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterGate), 0.f, FColor::Green, DebugMessage);
 	}
 
 	if (DebugAnim::bShowVelocity)
 	{
 		DebugMessage = FString::Printf(TEXT("Velocity: %s"), *AnimInstance->CharacterVelocity.ToString());
-		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterVelocity), 5.f, FColor::Yellow, DebugMessage);
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterVelocity), 0.f, FColor::Yellow, DebugMessage);
 
 		DebugMessage = FString::Printf(TEXT("Character Speed: %f"), AnimInstance->CharacterSpeed);
-		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterSpeed), 5.f, FColor::Yellow, DebugMessage);
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterSpeed), 0.f, FColor::Yellow, DebugMessage);
 		
 		/*DebugMessage = FString::Printf(TEXT("Velocity Angle: %f"), CharacterVelocityAngle);
 		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterVelocityAngle), 5.f, FColor::Yellow, DebugMessage);
@@ -91,10 +92,10 @@ void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
 	if(DebugAnim::bShowTurn)
 	{
 		DebugMessage = FString::Printf(TEXT("Turn Type: %s"), *UEnum::GetValueAsString(AnimInstance->CharacterTurnType));
-		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterTurnType), 5.f, FColor::Purple, DebugMessage);
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterTurnType), 0.f, FColor::Purple, DebugMessage);
 
 		DebugMessage = FString::Printf(TEXT("Root Yaw Offset: %f"), AnimInstance->RootYawOffset);
-		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::RootYawOffset), 5.f, FColor::Purple, DebugMessage);
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::RootYawOffset), 0.f, FColor::Purple, DebugMessage);
 	}
 
 	/*
@@ -120,7 +121,7 @@ void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
 	float TimeDilation = World->GetWorldSettings()->TimeDilation;
 	if(FMath::Abs(TimeDilation - 1.f) >= SMALL_NUMBER)
 	{
-		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::GlobalTimeDilation), 1.f, FColor::Red, FString::Printf(TEXT("Time Dilation: %f"), TimeDilation));
+		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::GlobalTimeDilation), 0.f, FColor::Red, FString::Printf(TEXT("Time Dilation: %f"), TimeDilation));
 	}
 	
 }

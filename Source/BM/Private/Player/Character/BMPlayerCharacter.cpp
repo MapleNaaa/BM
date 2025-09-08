@@ -3,11 +3,18 @@
 
 #include "Player/Character/BMPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Player/Component/BMCharacterMovementComponent.h"
 
 
 ABMPlayerCharacter::ABMPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+ABMPlayerCharacter::ABMPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UBMCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+{
+	
 }
 
 void ABMPlayerCharacter::BeginPlay()

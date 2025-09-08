@@ -11,6 +11,10 @@ ABMBaseCharacter::ABMBaseCharacter()
 
 }
 
+ABMBaseCharacter::ABMBaseCharacter(const FObjectInitializer& ObjectInitializer)
+{
+}
+
 // Called when the game starts or when spawned
 void ABMBaseCharacter::BeginPlay()
 {

@@ -16,6 +16,7 @@ class BM_API ABMPlayerCharacter : public ABMBaseCharacter
 
 public:
 	ABMPlayerCharacter();
+	ABMPlayerCharacter(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void SetCharacterGate(EBMCharacterGate NewGate);
 	EBMCharacterGate GetCharacterGate() const { return CurrentCharacterGate; }

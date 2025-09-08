@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/EngineSubsystem.h"
-//#include "BMSettings.generated.h"
+#include "BMSettings.generated.h"
 
 /**
  * 
- *//*
-UCLASS()
+ */
+UCLASS(config = UserSystemSettings)
 class BM_API UBMSettings : public UEngineSubsystem
 {
 	GENERATED_BODY()
@@ -28,5 +28,3 @@ protected:
 	float SensitivityMinClamp = 0.1f;
 	
 };
-*/
-

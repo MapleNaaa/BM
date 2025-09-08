@@ -20,7 +20,10 @@ void UBMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!IsValid(BMPlayerCharacter)) return;
 
 	DebugAnimation->DebugFunc(this);
+
+	CharacterRotation = BMPlayerCharacter->GetActorRotation();
 	
+	UpdateCharacterTurn(DeltaSeconds);
 }
 
 void UBMAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
@@ -32,7 +35,6 @@ void UBMAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	CurrentCharacterGate = BMPlayerCharacter->GetCharacterGate();
 	
 	UpdateCharacterVelocity(DeltaSeconds);
-	UpdateCharacterTurn(DeltaSeconds);
 
 }
 
@@ -50,16 +52,15 @@ void UBMAnimInstance::UpdateCharacterTurn(float DeltaSeconds)
 	// ~ Turn
 	if(RootYawOffsetMode == EBMRootYawOffsetMode::Accumulate)
 	{
-		float Offset = BMPlayerCharacter->GetActorRotation().Yaw - LastCharacterYaw;
-		RootYawOffset = UKismetMathLibrary::NormalizeAxis(RootYawOffset - Offset); 
+		float Offset = BMPlayerCharacter->GetActorRotation().Yaw - BMPlayerCharacter->GetControlRotation().Yaw;
+		RootYawOffset = UKismetMathLibrary::NormalizeAxis(Offset); 
 	}
-	else if(RootYawOffsetMode == EBMRootYawOffsetMode::BlendOut)
+	/*else if(RootYawOffsetMode == EBMRootYawOffsetMode::BlendOut)
 	{
 		float Tmp = UKismetMathLibrary::FloatSpringInterp(RootYawOffset, 0.f, RootYawOffsetSpring,
 			80,1, DeltaSeconds,1,0.5);
 		RootYawOffset = UKismetMathLibrary::NormalizeAxis(Tmp);
-	}
-	LastCharacterYaw = BMPlayerCharacter->GetActorRotation().Yaw;
+	}*/
 	// ~ End Turn
 
 	CharacterTurnType = EBMTurnType::None;
@@ -82,7 +83,7 @@ void UBMAnimInstance::UpdateCharacterTurn(float DeltaSeconds)
 
 	LastTurnCurveYaw = CurrentTurnCurveYaw;
 	float CurrentTurnCurveStageValue = GetCurveValue(TurnCurveStageName);
-	UE_LOG(LogTemp, Error, TEXT("CurrentTurnCurveStageValue: %f"), CurrentTurnCurveStageValue);
+	// UE_LOG(LogTemp, Error, TEXT("CurrentTurnCurveStageValue: %f"), CurrentTurnCurveStageValue);
 	if(CurrentTurnCurveStageValue < 0.1f)
 	{
 		LastTurnCurveYaw = 0.f;
@@ -91,10 +92,20 @@ void UBMAnimInstance::UpdateCharacterTurn(float DeltaSeconds)
 	else
 	{
 		CurrentTurnCurveYaw = CurrentTurnCurveStageValue > 0 ? GetCurveValue(TurnCurveYawName) : 0.f;
-		UE_LOG(LogTemp, Warning, TEXT("CurrentTurnCurveYaw: %f"), CurrentTurnCurveYaw);
+		// UE_LOG(LogTemp, Warning, TEXT("CurrentTurnCurveYaw: %f"), CurrentTurnCurveYaw);
 		if(LastTurnCurveYaw == 0.f) return;
-		RootYawOffset -= UKismetMathLibrary::NormalizeAxis(CurrentTurnCurveYaw - LastTurnCurveYaw);
+		AbsMaxTurnYawValue = FMath::Abs(AbsMaxTurnYawValue) > FMath::Abs(CurrentTurnCurveYaw) ? AbsMaxTurnYawValue : CurrentTurnCurveYaw;
+		float TempOffset = UKismetMathLibrary::NormalizeAxis(CurrentTurnCurveYaw - LastTurnCurveYaw);
+
+		
+		
+		// UE_LOG(LogTemp, Warning, TEXT("TempOffset: %f"), TempOffset);
+		// FRotator NewRotation = FRotator(CharacterRotation.Pitch,CharacterRotation.Yaw - TempOffset,CharacterRotation.Roll);
+		// UE_LOG(LogTemp, Warning, TEXT("NewRotation: %s"), *NewRotation.ToString());
+		// BMPlayerCharacter->SetActorRotation(NewRotation);
+		
+
+		// BMPlayerCharacter->SetActorTransform()
 	}
-	RootYawOffset = 0.f;
 	
 }
