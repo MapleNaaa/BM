@@ -16,43 +16,53 @@ class UBMAnimInstance;
 namespace DebugAnim
 {
 	static bool bShowDebug = false;
-	static bool bShowVelocity = false;
-	static bool bShowTurn = false;
-	static bool bShowState = false;
+	static bool bShowVelocity = true;
+	static bool bShowTurn = true;
+	static bool bShowState = true;
 
-	static FAutoConsoleCommand CVarShowDebug(
-		TEXT("DebugAnim.bShowDebug"),
-		TEXT("Show the debug information in the top left corner of the screen. use"),
-		FConsoleCommandDelegate::CreateLambda([]()
-		{
-			bShowDebug = !bShowDebug;
-			
-			bShowVelocity = bShowDebug;
-			bShowTurn = bShowDebug;
-			bShowState = bShowDebug;
-		})
+	/*
+	static FAutoConsoleVariableRef CVarShowDebug(
+		TEXT("DebugAnim.ShowDebug"),
+		bShowDebug,
+		TEXT("Show all debug information. Usage: DebugAnim.ShowDebug [0/1]"),
+		ECVF_Default
 	);
 
 	static FAutoConsoleVariableRef CVarShowVelocity(
-		TEXT("DebugAnim.bShowVelocity"),
+		TEXT("DebugAnim.ShowVelocity"),
 		bShowVelocity,
 		TEXT("Show the current character velocity in the top left corner of the screen. use [true/false]."),
 		ECVF_Default
 	);
 	
 	static FAutoConsoleVariableRef CVarShowTurn(
-		TEXT("DebugAnim.bShowTurn"),
+		TEXT("DebugAnim.ShowTurn"),
 		bShowTurn,
 		TEXT("Show the current character turn in the top left corner of the screen. use [true/false]."),
 		ECVF_Default
 	);
 
 	static FAutoConsoleVariableRef CVarShowState(
-		TEXT("DebugAnim.bShowState"),
+		TEXT("DebugAnim.ShowState"),
 		bShowState,
 		TEXT("Show the current character state in the top left corner of the screen. use [true/false]."),
 		ECVF_Default
 	);
+
+	static FAutoConsoleCommand ToggleAllCommand(
+	  TEXT("DebugAnim.ToggleAll"),  // 这是一个命令，不需要参数
+	  TEXT("Toggle all debug displays"),
+	  FConsoleCommandDelegate::CreateLambda([]()
+	  {
+		  bShowDebug = !bShowDebug;
+		  bShowVelocity = bShowDebug;
+		  bShowTurn = bShowDebug;
+		  bShowState = bShowDebug;
+            
+		  UE_LOG(LogTemp, Warning, TEXT("Debug Animation: %s"), 
+			  bShowDebug ? TEXT("Enabled") : TEXT("Disabled"));
+	  })
+  );*/
 }
 
 

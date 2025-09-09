@@ -6,8 +6,9 @@
 void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
 {
 	UWorld* World = GetWorld();
+	if(!IsValid(World)) return;
 	ABMPlayerCharacter *PlayerCharacter = Cast<ABMPlayerCharacter>(AnimInstance->GetOwningActor());
-	if(!IsValid(World) || !IsValid(PlayerCharacter)) return;
+	if(!IsValid(PlayerCharacter)) return;
 	
 	FString DebugMessage = TEXT("");
 

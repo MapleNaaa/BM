@@ -4,80 +4,63 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/RootMotionSource.h"
 #include "BMCharacterMovementComponent.generated.h"
 
 /** 
  * MoveToDynamicForce moves the target to a given location in world space over the duration, where the end location
  * is dynamic and can change during the move (meant to be used for things like moving to a moving target)
  */
- /*
+ 
 USTRUCT()
-struct FRootMotionSource_DynamicTransform : public FRootMotionSource
+struct FRootMotionSource_TransformDelta : public FRootMotionSource
 {
 	GENERATED_USTRUCT_BODY()
 
-	ENGINE_API FRootMotionSource_DynamicTransform();
+	FRootMotionSource_TransformDelta();
 
-	virtual ~FRootMotionSource_DynamicTransform() {}
+	virtual ~FRootMotionSource_TransformDelta() {}
 
+	/** 目标位置 */
 	UPROPERTY()
-	FTransform StartTransform;
+	FTransform CurrentFrameRootMotion;
 
+	/** 是否有待处理的根运动 */
 	UPROPERTY()
-	FTransform InitialTargetTransform;
+	bool bHasPendingRootMotion;
+	
+	/** 每帧调用此函数来更新根运动 */
+	void SetFrameRootMotion(const FTransform& InRootMotion);
 
-	// Dynamically-changing location of target, which may be altered while this movement is ongoing 
-	UPROPERTY()
-	FTransform TargetTransform;
+	virtual FRootMotionSource* Clone() const override;
 
-	UPROPERTY()
-	bool bRestrictSpeedToExpected;
+	virtual bool Matches(const FRootMotionSource* Other) const override;
 
-	UPROPERTY()
-	TObjectPtr<UCurveVector> PathOffsetCurve;
-
-	UPROPERTY()
-	TObjectPtr<UCurveFloat> TimeMappingCurve;
-
-	ENGINE_API void SetTargetTransform(FTransform NewTargetTransform);
-
-	ENGINE_API FVector GetPathOffsetInWorldSpace(const float MoveFraction) const;
-
-	ENGINE_API virtual FRootMotionSource* Clone() const override;
-
-	ENGINE_API virtual bool Matches(const FRootMotionSource* Other) const override;
-
-	ENGINE_API virtual bool MatchesAndHasSameState(const FRootMotionSource* Other) const override;
-
-	ENGINE_API virtual bool UpdateStateFrom(const FRootMotionSource* SourceToTakeStateFrom, bool bMarkForSimulatedCatchup = false) override;
-
-	ENGINE_API virtual void SetTime(float NewTime) override;
-
-	ENGINE_API virtual void PrepareRootMotion(
+	virtual void PrepareRootMotion(
 		float SimulationTime, 
 		float MovementTickTime,
 		const ACharacter& Character, 
 		const UCharacterMovementComponent& MoveComponent
 		) override;
 
-	ENGINE_API virtual bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) override;
+	virtual bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) override;
 
-	ENGINE_API virtual UScriptStruct* GetScriptStruct() const override;
+	virtual UScriptStruct* GetScriptStruct() const override;
 
-	ENGINE_API virtual FString ToSimpleString() const override;
+	virtual FString ToSimpleString() const override;
 
-	ENGINE_API virtual void AddReferencedObjects(class FReferenceCollector& Collector) override;
+	void AddReferencedObjects(class FReferenceCollector& Collector) override;
 };
 
 template<>
-struct TStructOpsTypeTraits< FRootMotionSource_DynamicTransform > : public TStructOpsTypeTraitsBase2< FRootMotionSource_DynamicTransform >
+struct TStructOpsTypeTraits< FRootMotionSource_TransformDelta > : public TStructOpsTypeTraitsBase2< FRootMotionSource_TransformDelta >
 {
 	enum
 	{
 		WithNetSerializer = true,
 		WithCopy = true
 	};
-};*/
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class BM_API UBMCharacterMovementComponent : public UCharacterMovementComponent
@@ -86,7 +69,6 @@ class BM_API UBMCharacterMovementComponent : public UCharacterMovementComponent
 
 public:
 	UBMCharacterMovementComponent();
-	static FTransform FixRootMotionTransformStatic(const FTransform& InTransform, UCharacterMovementComponent* InMovement, float DeltaSeconds);
 
 protected:
 	virtual void BeginPlay() override;

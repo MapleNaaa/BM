@@ -8,7 +8,7 @@ public class BM : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Chooser" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Chooser" ,"AnimGraphRuntime", "NetCore" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Eigen" });
 

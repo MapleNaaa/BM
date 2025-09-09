@@ -6,20 +6,28 @@
 #include "Player/Component/BMCharacterMovementComponent.h"
 
 
-ABMPlayerCharacter::ABMPlayerCharacter()
-{
-	PrimaryActorTick.bCanEverTick = true;
-}
-
 ABMPlayerCharacter::ABMPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer.SetDefaultSubobjectClass<UBMCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	
+	PrimaryActorTick.bCanEverTick = true;
+	// 创建根运动组件
+	RootMotionComponent = CreateDefaultSubobject<UBMRootMotionComponent>(TEXT("RootMotionComponent"));
+}
+
+void ABMPlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void ABMPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (RootMotionComponent)
+	{
+		RootMotionComponent->SetRootMotionEnabled(true);
+		RootMotionComponent->EnableAutoExtractFromAnimation(true);
+	}
 	
 }
 

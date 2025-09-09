@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BMBaseCharacter.h"
 #include "ES/BMPlayerTypes.h"
+#include "Player/Component/BMRootMotionComponent.h"
 #include "BMPlayerCharacter.generated.h"
 
 class UBMAnimLayerInstance;
@@ -15,16 +16,22 @@ class BM_API ABMPlayerCharacter : public ABMBaseCharacter
 	GENERATED_BODY()
 
 public:
-	ABMPlayerCharacter();
 	ABMPlayerCharacter(const FObjectInitializer& ObjectInitializer);
+
+	virtual void Tick(float DeltaTime) override;
 	
 	virtual void SetCharacterGate(EBMCharacterGate NewGate);
 	EBMCharacterGate GetCharacterGate() const { return CurrentCharacterGate; }
-
+	
 protected:
 	virtual void BeginPlay() override;
 
 protected:
+	
+	/** 根运动管理组件 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UBMRootMotionComponent* RootMotionComponent;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Animation")
 	TObjectPtr<UBMAnimLayerInstance> LinkAnimInstance;
 
