@@ -22,7 +22,7 @@ FRootMotionSource_TransformDelta::FRootMotionSource_TransformDelta():
     Settings.SetFlag(ERootMotionSourceSettingsFlags::UseSensitiveLiftoffCheck);
     Settings.SetFlag(ERootMotionSourceSettingsFlags::DisablePartialEndTick);
     
-    // 使用Override模式，完全替代其他根运动
+    // 使用Additive模式，完全替代其他根运动
     AccumulateMode = ERootMotionAccumulateMode::Additive;
     
     // 设置高优先级

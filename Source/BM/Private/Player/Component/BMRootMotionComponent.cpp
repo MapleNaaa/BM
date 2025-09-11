@@ -29,7 +29,7 @@ void UBMRootMotionComponent::BeginPlay()
     Super::BeginPlay();
     
     // 获取Owner引用
-    OwnerCharacter = Cast<ACharacter>(GetOwner());
+    OwnerCharacter = Cast<ABMPlayerCharacter>(GetOwner());
     if (OwnerCharacter)
     {
         MovementComponent = OwnerCharacter->GetCharacterMovement();
@@ -141,7 +141,7 @@ FTransform UBMRootMotionComponent::ExtractRootMotionFromAnimation()
         return FTransform::Identity;
     }
     
-    UAnimInstance* AnimInstance = MeshComp->GetLinkedAnimLayerInstanceByClass(UBMAnimLayerInstance::StaticClass());
+    UAnimInstance* AnimInstance = MeshComp->GetAnimInstance();
     if (!AnimInstance)
     {
         return FTransform::Identity;
@@ -153,6 +153,11 @@ FTransform UBMRootMotionComponent::ExtractRootMotionFromAnimation()
     FTransform RootMotion = RootMotionParams.GetRootMotionTransform();
     // FTransform RootMotion = FTransform::Identity;
     // RootMotion.SetLocation(FVector(100.0f, 0.0f, 0.0f));
+
+    if(!RootMotion.Equals(FTransform::Identity))
+    {
+        UE_LOG(LogTemp, Log, TEXT("BMRootMotionComponent: Extracted RootMotion: %s"), *RootMotion.ToString());
+    }
     
     return RootMotion;
 }

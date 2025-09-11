@@ -2,6 +2,8 @@
 
 
 #include "Player/Character/BMBaseCharacter.h"
+#include "Net/UnrealNetwork.h"
+#include "GameFramework/PlayerState.h"
 
 // Sets default values
 ABMBaseCharacter::ABMBaseCharacter()
@@ -26,7 +28,16 @@ void ABMBaseCharacter::BeginPlay()
 void ABMBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	// 获取玩家状态和网络角色
+	APlayerState* TmpPlayerState = GetPlayerState();
+	FString ClientID = TmpPlayerState ? FString::Printf(TEXT("ClientID:%d"), TmpPlayerState->GetPlayerId()) : TEXT("NoPlayerState");
+	FString RoleStr = GetLocalRole() == ROLE_Authority ? TEXT("Server") : TEXT("Client");
+    
+	UE_LOG(LogTemp, Log, TEXT("ABMBaseCharacter::Tick - %s [%s] Name: %s  Rotation: %s"), 
+		*RoleStr, 
+		*ClientID, 
+		*GetName(), 
+		*GetActorRotation().ToString());
 }
 
 // Called to bind functionality to input

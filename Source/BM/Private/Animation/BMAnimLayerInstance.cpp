@@ -2,30 +2,111 @@
 
 
 #include "Animation/BMAnimLayerInstance.h"
+#include "Player/Component/BMAnimStateComponent.h"
 #include "Animation/BMAnimInstance.h"
 #include "ChooserFunctionLibrary.h"
+#include "Animation/Debug/AnimDebug.h"
+#include "Net/UnrealNetwork.h"
 
 void UBMAnimLayerInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
+	
+	DebugAnimation = NewObject<UBMDebugAnimation>(this);
+	
+	OwnerCharacter = Cast<ABMPlayerCharacter>(TryGetPawnOwner());
+	if (!IsValid(OwnerCharacter)) return;
+	AnimStateComponent = OwnerCharacter->FindComponentByClass<UBMAnimStateComponent>();
+	if (!IsValid(AnimStateComponent)) return;
+}
 
-	ACharacter* OwningCharacter = Cast<ACharacter>(TryGetPawnOwner());
-	if (!IsValid(OwningCharacter)) return;
-	BMAnimInstance = Cast<UBMAnimInstance>(OwningCharacter->GetMesh()->GetAnimInstance());
+void UBMAnimLayerInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeUpdateAnimation(DeltaSeconds);
+	if (!IsValid(OwnerCharacter))
+	{
+		OwnerCharacter = Cast<ABMPlayerCharacter>(TryGetPawnOwner());
+		if (!IsValid(OwnerCharacter)) return;
+	};
+	if (!IsValid(AnimStateComponent))
+	{
+		AnimStateComponent = OwnerCharacter->FindComponentByClass<UBMAnimStateComponent>();
+		if (!IsValid(AnimStateComponent)) return;
+	};
+	
+	UpdateCharacterTurn(DeltaSeconds);
+
+	DebugAnimation->DebugFunc(this);
 }
 
 void UBMAnimLayerInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
-	if (!IsValid(BMAnimInstance)) return;
+	if (!IsValid(OwnerCharacter))
+	{
+		OwnerCharacter = Cast<ABMPlayerCharacter>(TryGetPawnOwner());
+		if (!IsValid(OwnerCharacter)) return;
+	};
+	if (!IsValid(AnimStateComponent))
+	{
+		AnimStateComponent = OwnerCharacter->FindComponentByClass<UBMAnimStateComponent>();
+		if (!IsValid(AnimStateComponent)) return;
+	};
+	
+	if (!IsValid(OwnerCharacter) || !IsValid(AnimStateComponent)) return;
 
-	CurrentCharacterGate = BMAnimInstance->CurrentCharacterGate;
-	CurrentTurnType = BMAnimInstance->CharacterTurnType;
+	CharacterGate = OwnerCharacter->GetCharacterGate();
+	ControlRotation = AnimStateComponent->ControlRotation;
+	UpdateCharacterVelocity(DeltaSeconds);
+	UpdateCharacterTurn(DeltaSeconds);
 }
 
-void UBMAnimLayerInstance::ModifyRootMotionTransform(FTransform& RootMotion)
+void UBMAnimLayerInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
+void UBMAnimLayerInstance::UpdateCharacterTurn(float DeltaSeconds)
+{
+	if(RootYawOffsetMode == EBMRootYawOffsetMode::Accumulate)
+	{
+		float Offset = OwnerCharacter->GetActorRotation().Yaw - ControlRotation.Yaw;
+		RootYawOffset = UKismetMathLibrary::NormalizeAxis(Offset); 
+	}
+	/*else if(RootYawOffsetMode == EBMRootYawOffsetMode::BlendOut)
+	{
+		float Tmp = UKismetMathLibrary::FloatSpringInterp(RootYawOffset, 0.f, RootYawOffsetSpring,
+			80,1, DeltaSeconds,1,0.5);
+		RootYawOffset = UKismetMathLibrary::NormalizeAxis(Tmp);
+	}*/
+
+	CharacterTurnType = EBMTurnType::None;
+	if(RootYawOffset > BackAngle)
+	{
+		CharacterTurnType = EBMTurnType::LeftToBack;
+	}
+	else if(RootYawOffset > FrontAngle)
+	{
+		CharacterTurnType = EBMTurnType::Left;
+	}
+	else if(RootYawOffset < -BackAngle)
+	{
+		CharacterTurnType = EBMTurnType::RightToBack;
+	}
+	else if(RootYawOffset < -FrontAngle)
+	{
+		CharacterTurnType = EBMTurnType::Right;
+	}
 	
+}
+
+void UBMAnimLayerInstance::UpdateCharacterVelocity(float DeltaSeconds)
+{
+	// ~ Speed
+	CharacterVelocity = OwnerCharacter->GetVelocity();
+	CharacterVelocity2D = CharacterVelocity.GetSafeNormal2D();
+	CharacterSpeed = CharacterVelocity2D.Size2D();
+	// ~ End Speed
 }
 
 UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable)
@@ -38,13 +119,6 @@ UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTab
 	}
 	return Cast<UAnimSequence>(Result);
 
-}
-
-void UBMAnimLayerInstance::PlayMontageInBM(UAnimMontage* Montage)
-{
-	// MontagePlayer->PlayMontage(Montage);
-	// Montage
-	Montage_Play(Montage);
 }
 
 void UBMAnimLayerInstance::NativePostEvaluateAnimation()

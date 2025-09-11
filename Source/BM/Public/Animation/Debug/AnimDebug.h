@@ -72,6 +72,6 @@ class UBMDebugAnimation : public UObject
 	GENERATED_BODY()
 
 public:
-	 void DebugFunc(UBMAnimInstance* AnimInstance) const;
+	 void DebugFunc(UBMAnimLayerInstance* AnimInstance) const ;
 };
 

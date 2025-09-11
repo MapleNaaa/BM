@@ -7,8 +7,10 @@
 #include "Animation/AnimInstance.h"
 #include "ES/BMAnimationTypes.h"
 #include "ES/BMPlayerTypes.h"
+#include "Player/Character/BMPlayerCharacter.h"
 #include "BMAnimLayerInstance.generated.h"
 
+class UBMDebugAnimation;
 class UBMAnimInstance;
 /**
  * 
@@ -20,35 +22,61 @@ class BM_API UBMAnimLayerInstance : public UAnimInstance
 
 public:
 	virtual void NativeInitializeAnimation() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
-
-	UPROPERTY(BlueprintReadOnly, Category="BM")
-	FTransform RootMotionCached;
-	
-	void ModifyRootMotionTransform(FTransform& RootMotion);
-
+	virtual void NativePostEvaluateAnimation() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category=Animation)
 	UAnimSequence* GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable);
-
-	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe), Category=Animation)
-	void PlayMontageInBM(UAnimMontage* Montage);
-
-	virtual void NativePostEvaluateAnimation() override;
 	
 protected:
-	UPROPERTY(BlueprintReadWrite, Category="BM")
-	TObjectPtr<UBMAnimInstance> BMAnimInstance;
+	virtual void UpdateCharacterTurn(float DeltaSeconds);
+	virtual void UpdateCharacterVelocity(float DeltaSeconds);
 	
-	UPROPERTY(BlueprintReadWrite, Category="BM")
-	EBMSMStage CurrentSMStage = EBMSMStage::Idle;
+protected:
+	UPROPERTY()
+	ABMPlayerCharacter* OwnerCharacter = nullptr;
+	UPROPERTY()
+	UBMAnimStateComponent* AnimStateComponent = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, Category="BM")
-	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::Walk;
+	UPROPERTY(BlueprintReadOnly, Category="State")
+	EBMCharacterGate CharacterGate = EBMCharacterGate::Walk;
 
-	UPROPERTY(BlueprintReadWrite, Category="BM")
-	EBMTurnType CurrentTurnType = EBMTurnType::None;
+	// ~ Transform
+	UPROPERTY(BlueprintReadOnly, Category="Transform")
+	FRotator CharacterRotation = FRotator::ZeroRotator;
 
+	UPROPERTY(BlueprintReadOnly, Category="Transform")
+	FRotator ControlRotation = FRotator::ZeroRotator;
+	// ~ End Transform
+
+	// ~ Speed
+	UPROPERTY(BlueprintReadOnly, Category="Velocity")
+	float CharacterSpeed = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Velocity")
+	FVector CharacterVelocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Velocity")
+	FVector CharacterVelocity2D = FVector::ZeroVector;
+	// ~ End Speed
+
+	// ~ Turn
+	UPROPERTY(BlueprintReadWrite, Category="State")
+	EBMRootYawOffsetMode RootYawOffsetMode = EBMRootYawOffsetMode::Accumulate;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Turn")
+	float RootYawOffset = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
+	float BackAngle = 160.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
+	float FrontAngle = 90.0f;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Turn")
+	EBMTurnType CharacterTurnType = EBMTurnType::None;
+	// ~ End Turn
 
 	// ~ Animation Chooser Tables
 	// These tables are used to choose animations based on the current state of the character.
@@ -57,4 +85,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="AnimationChooserTable")
 	TObjectPtr<UChooserTable> TurnChooserTable;
+
+	UPROPERTY()
+	UBMDebugAnimation* DebugAnimation;
+
+private:
+	friend class UBMDebugAnimation;
 };

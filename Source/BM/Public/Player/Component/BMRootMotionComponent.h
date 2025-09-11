@@ -47,7 +47,7 @@ protected:
 private:
 	/** 拥有者Character的引用 */
 	UPROPERTY()
-	class ACharacter* OwnerCharacter;
+	class ABMPlayerCharacter* OwnerCharacter;
 
 	/** 移动组件的引用 */
 	UPROPERTY()

@@ -1,9 +1,9 @@
 
 #include "Animation/Debug/AnimDebug.h"
-#include "Animation/BMAnimInstance.h"
+#include "Animation/BMAnimLayerInstance.h"
 
 
-void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
+void UBMDebugAnimation::DebugFunc(UBMAnimLayerInstance* AnimInstance) const
 {
 	UWorld* World = GetWorld();
 	if(!IsValid(World)) return;
@@ -23,7 +23,7 @@ void UBMDebugAnimation::DebugFunc(UBMAnimInstance* AnimInstance) const
 	// UE_LOG(LogTemp, Warning, TEXT("AnimDebug Params : bShowState: %d , bShowVelocity: %d , bShowTurn %d"), DebugAnim::bShowState, DebugAnim::bShowVelocity, DebugAnim::bShowTurn);
 	if (DebugAnim::bShowState)
 	{
-		DebugMessage = FString::Printf(TEXT("State: %s"), *UEnum::GetValueAsString(AnimInstance->CurrentCharacterGate));
+		DebugMessage = FString::Printf(TEXT("State: %s"), *UEnum::GetValueAsString(AnimInstance->CharacterGate));
 		GEngine->AddOnScreenDebugMessage(static_cast<int>(EDebugAnimIndex::CharacterGate), 0.f, FColor::Green, DebugMessage);
 	}
 

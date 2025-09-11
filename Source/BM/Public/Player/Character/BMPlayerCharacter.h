@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "BMBaseCharacter.h"
 #include "ES/BMPlayerTypes.h"
-#include "Player/Component/BMRootMotionComponent.h"
 #include "BMPlayerCharacter.generated.h"
 
+class UBMAnimStateComponent;
 class UBMAnimLayerInstance;
+class UBMRootMotionComponent;
 
 UCLASS()
 class BM_API ABMPlayerCharacter : public ABMBaseCharacter
@@ -19,23 +20,33 @@ public:
 	ABMPlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void SetCharacterGate(EBMCharacterGate NewGate);
 	EBMCharacterGate GetCharacterGate() const { return CurrentCharacterGate; }
+
+	TSubclassOf<UBMAnimLayerInstance> GetLinkAnimInstance() const { return LinkAnimInstance; }
 	
 protected:
 	virtual void BeginPlay() override;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_CharacterGate(EBMCharacterGate NewGate);
 
 protected:
 	
 	/** 根运动管理组件 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UBMRootMotionComponent* RootMotionComponent;
+	UBMRootMotionComponent* RootMotionComponent;
+
+	/** 动画状态管理组件 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UBMAnimStateComponent* AnimStateComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Animation")
-	TObjectPtr<UBMAnimLayerInstance> LinkAnimInstance;
+	TSubclassOf<UBMAnimLayerInstance> LinkAnimInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="BM|Gate")
+	UPROPERTY(BlueprintReadOnly, Replicated, Category="BM|Gate")
 	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::Walk;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Gate")
