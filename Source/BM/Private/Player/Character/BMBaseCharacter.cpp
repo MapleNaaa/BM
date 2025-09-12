@@ -34,12 +34,12 @@ void ABMBaseCharacter::Tick(float DeltaTime)
 	FString ClientID = TmpPlayerState ? FString::Printf(TEXT("ClientID:%d"), TmpPlayerState->GetPlayerId()) : TEXT("NoPlayerState");
 	FString RoleStr = GetLocalRole() == ROLE_Authority ? TEXT("Server") : TEXT("Client");
     
-	UE_LOG(LogTemp, Log, TEXT("ABMBaseCharacter::Tick - %s [%s] Name: %s Location %s Rotation: %s"), 
+	/*UE_LOG(LogTemp, Log, TEXT("ABMBaseCharacter::Tick - %s [%s] Name: %s Location %s Rotation: %s"), 
 		*RoleStr, 
 		*ClientID, 
 		*GetName(), 
 		*(GetActorLocation() - LastLocation).ToString(),
-		*GetActorRotation().ToString());
+		*GetActorRotation().ToString());*/
 
 	LastLocation = GetActorLocation();
 }

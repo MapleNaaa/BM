@@ -37,6 +37,16 @@ enum class EBMTurnType : uint8
 
 
 UENUM(BlueprintType)
+enum class EBMLocoDirection : uint8
+{
+    Forward = 0,
+    Backward = 1,
+    Left = 2,
+    Right = 3,
+};
+
+
+UENUM(BlueprintType)
 enum class EDebugAnimIndex : uint8
 {
     None = 0,

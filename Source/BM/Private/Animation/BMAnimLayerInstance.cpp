@@ -2,10 +2,14 @@
 
 
 #include "Animation/BMAnimLayerInstance.h"
+
+#include "AnimCharacterMovementLibrary.h"
 #include "Player/Component/BMAnimStateComponent.h"
 #include "Animation/BMAnimInstance.h"
 #include "ChooserFunctionLibrary.h"
+#include "KismetAnimationLibrary.h"
 #include "Animation/Debug/AnimDebug.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Player/Component/BMRootMotionComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -19,8 +23,8 @@ void UBMAnimLayerInstance::NativeInitializeAnimation()
 	if (!IsValid(OwnerCharacter)) return;
 	AnimStateComponent = OwnerCharacter->FindComponentByClass<UBMAnimStateComponent>();
 	if (!IsValid(AnimStateComponent)) return;
-	RootMotionComponent = OwnerCharacter->FindComponentByClass<UBMRootMotionComponent>();
-	if (!IsValid(RootMotionComponent)) return;
+	MainAnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
+	if (!IsValid(MainAnimInstance)) return;
 }
 
 void UBMAnimLayerInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -37,8 +41,7 @@ void UBMAnimLayerInstance::NativeUpdateAnimation(float DeltaSeconds)
 		if (!IsValid(AnimStateComponent)) return;
 	};
 
-	UAnimInstance* MainAnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
-	if(RootAnimSequence)
+	if(bIsRootMotionActive)
 	{
 		MainAnimInstance->SetRootMotionMode(ERootMotionMode::Type::RootMotionFromEverything);
 		SetRootMotionMode(ERootMotionMode::Type::RootMotionFromEverything);
@@ -51,7 +54,7 @@ void UBMAnimLayerInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	UpdateCharacterTurn(DeltaSeconds);
 
-	// DebugAnimation->DebugFunc(this);
+	DebugAnimation->DebugFunc(this);
 }
 
 void UBMAnimLayerInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
@@ -72,7 +75,11 @@ void UBMAnimLayerInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
 	CharacterGate = OwnerCharacter->GetCharacterGate();
 	ControlRotation = AnimStateComponent->ControlRotation;
+	CharacterRotation = OwnerCharacter->GetActorRotation();
+	
+	UpdateCharacterTransform(DeltaSeconds);
 	UpdateCharacterVelocity(DeltaSeconds);
+	UpdateCharacterLocomotion(DeltaSeconds);
 	UpdateCharacterTurn(DeltaSeconds);
 }
 
@@ -96,19 +103,19 @@ void UBMAnimLayerInstance::UpdateCharacterTurn(float DeltaSeconds)
 	}
 
 	CharacterTurnType = EBMTurnType::None;
-	if(RootYawOffset > BackAngle)
+	if(RootYawOffset > TurnBackAngle)
 	{
 		CharacterTurnType = EBMTurnType::LeftToBack;
 	}
-	else if(RootYawOffset > FrontAngle)
+	else if(RootYawOffset > TurnFrontAngle)
 	{
 		CharacterTurnType = EBMTurnType::Left;
 	}
-	else if(RootYawOffset < -BackAngle)
+	else if(RootYawOffset < -TurnBackAngle)
 	{
 		CharacterTurnType = EBMTurnType::RightToBack;
 	}
-	else if(RootYawOffset < -FrontAngle)
+	else if(RootYawOffset < -TurnFrontAngle)
 	{
 		CharacterTurnType = EBMTurnType::Right;
 	}
@@ -119,9 +126,93 @@ void UBMAnimLayerInstance::UpdateCharacterVelocity(float DeltaSeconds)
 {
 	// ~ Speed
 	CharacterVelocity = OwnerCharacter->GetVelocity();
-	CharacterVelocity2D = CharacterVelocity.GetSafeNormal2D();
+	CharacterVelocity2D = FVector(CharacterVelocity.X,CharacterVelocity.Y, 0.f);
+	// UE_LOG(LogTemp, Warning, TEXT("CharacterVelocity2D: %s"), *CharacterVelocity2D.ToString());
 	CharacterSpeed = CharacterVelocity2D.Size2D();
+	// UE_LOG(LogTemp, Warning, TEXT("CharacterSpeed: %f"), CharacterSpeed);
+	CharacterVelocityAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity , CharacterRotation);
+	
+	CharacterLocoDirection = UpdateCharacterLocoDirection(CharacterLocoDirection, CharacterVelocityAngle);
+	
+	
 	// ~ End Speed
+}
+
+void UBMAnimLayerInstance::UpdateCharacterAcceleration(float DeltaSeconds)
+{
+	CharacterAcceleration = OwnerCharacter->GetCharacterMovement()->GetCurrentAcceleration();
+	CharacterAcceleration2D = FVector(CharacterAcceleration.X,CharacterAcceleration.Y, 0.f);
+	CharacterAccelerationSize = CharacterAcceleration2D.Size2D();
+
+	CharacterAccelerationAngle = UKismetAnimationLibrary::CalculateDirection(CharacterAcceleration , CharacterRotation);
+
+	CharacterAccelerationDirection = UpdateCharacterLocoDirection(CharacterAccelerationDirection, CharacterAccelerationAngle);
+}
+
+void UBMAnimLayerInstance::UpdateCharacterLocomotion(float DeltaSeconds)
+{
+	// Update StopLocation
+	UCharacterMovementComponent* CharacterMovement = OwnerCharacter->GetCharacterMovement();
+	CharacterStopLocation = UAnimCharacterMovementLibrary::PredictGroundMovementStopLocation(
+		CharacterVelocity, CharacterMovement->bUseSeparateBrakingFriction,
+		CharacterMovement->BrakingFriction, CharacterMovement->GroundFriction,
+		CharacterMovement->BrakingFrictionFactor,CharacterMovement->BrakingDecelerationWalking	);
+	CharacterPivotLocation = UAnimCharacterMovementLibrary::PredictGroundMovementPivotLocation(
+		CharacterAcceleration, CharacterVelocity, CharacterMovement->GroundFriction);
+}
+
+
+EBMLocoDirection UBMAnimLayerInstance::UpdateCharacterLocoDirection(EBMLocoDirection CurLocoDirection, const float SpeedAngle)
+{
+	// Use DeadZone to avoid jitter
+	switch (CurLocoDirection) 
+	{
+	case EBMLocoDirection::Forward:
+		if(SpeedAngle > ForwardDirectionMinAngle - CharacterDeadZone  &&  SpeedAngle <= ForwardDirectionMaxAngle + CharacterDeadZone) 
+		{
+			return EBMLocoDirection::Forward;
+		}
+		break;
+	case EBMLocoDirection::Backward:
+		if(SpeedAngle < BackwardDirectionMinAngle + CharacterDeadZone  ||  SpeedAngle >= BackwardDirectionMaxAngle - CharacterDeadZone) 
+		{
+			return EBMLocoDirection::Backward;
+		}
+		break;
+	case EBMLocoDirection::Left:
+		if(SpeedAngle > BackwardDirectionMinAngle - CharacterDeadZone  &&  SpeedAngle <= ForwardDirectionMinAngle + CharacterDeadZone) 
+		{
+			return  EBMLocoDirection::Left;
+		}
+		break;
+	case EBMLocoDirection::Right:
+		if(SpeedAngle > ForwardDirectionMaxAngle - CharacterDeadZone  &&  SpeedAngle <= BackwardDirectionMaxAngle + CharacterDeadZone) 
+		{
+			return EBMLocoDirection::Right;
+		}
+		break;
+	default:
+		break;
+	}
+
+	// Default
+	if(SpeedAngle > ForwardDirectionMinAngle  &&  SpeedAngle <= ForwardDirectionMaxAngle)
+	{
+		return  EBMLocoDirection::Forward;
+	}
+	else if(SpeedAngle < BackwardDirectionMinAngle  ||  SpeedAngle >= BackwardDirectionMaxAngle)
+	{
+		return EBMLocoDirection::Backward;
+	}
+	else if(SpeedAngle < ForwardDirectionMinAngle  &&  SpeedAngle >= BackwardDirectionMinAngle)
+	{
+		return  EBMLocoDirection::Left;
+	}
+	else if(SpeedAngle > ForwardDirectionMaxAngle &&  SpeedAngle <= BackwardDirectionMaxAngle)
+	{
+		return EBMLocoDirection::Right;
+	}
+	return EBMLocoDirection::Forward;
 }
 
 UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable)
@@ -134,6 +225,13 @@ UAnimSequence* UBMAnimLayerInstance::GetAnimSequenceFromChooserTable(UChooserTab
 	}
 	return Cast<UAnimSequence>(Result);
 
+}
+
+void UBMAnimLayerInstance::UpdateCharacterTransform(float DeltaSeconds)
+{
+	CharacterLocation = OwnerCharacter->GetActorLocation();
+	CharacterDeltaDistance = (CharacterLocation - LastCharacterLocation).Size2D();
+	LastCharacterLocation = CharacterLocation;
 }
 
 void UBMAnimLayerInstance::NativePostEvaluateAnimation()

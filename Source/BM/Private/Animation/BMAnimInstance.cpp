@@ -9,6 +9,8 @@
 void UBMAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
+
+	OwnerCharacter = Cast<ABMPlayerCharacter>(TryGetPawnOwner());
 }
 
 void UBMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -26,5 +28,10 @@ void UBMAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 void UBMAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
+ERootMotionMode::Type UBMAnimInstance::GetRootMotionMode() const
+{
+	return RootMotionMode;
 }
 

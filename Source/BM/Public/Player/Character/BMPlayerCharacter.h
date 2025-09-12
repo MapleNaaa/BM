@@ -47,7 +47,7 @@ protected:
 	TSubclassOf<UBMAnimLayerInstance> LinkAnimInstance;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category="BM|Gate")
-	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::Walk;
+	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::None;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Gate")
 	TMap<EBMCharacterGate, FBMCharacterGateSetting> CharacterGateSettings;

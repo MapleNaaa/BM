@@ -37,6 +37,7 @@ void ABMPlayerCharacter::BeginPlay()
 	{
 		// RootMotionComponent->SetRootMotionEnabled(true);
 	}
+	SetCharacterGate(EBMCharacterGate::Walk);
 	
 }
 

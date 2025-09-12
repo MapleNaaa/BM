@@ -23,4 +23,10 @@ public:
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category=Animation)
+	ERootMotionMode::Type GetRootMotionMode() const;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category=Animation)
+	ABMPlayerCharacter* OwnerCharacter;
 };

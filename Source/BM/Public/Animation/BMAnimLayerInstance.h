@@ -32,8 +32,12 @@ public:
 	UAnimSequence* GetAnimSequenceFromChooserTable(UChooserTable* ChooserTable);
 	
 protected:
+	virtual void UpdateCharacterTransform(float DeltaSeconds);
 	virtual void UpdateCharacterTurn(float DeltaSeconds);
 	virtual void UpdateCharacterVelocity(float DeltaSeconds);
+	virtual void UpdateCharacterAcceleration(float DeltaSeconds);
+	virtual void UpdateCharacterLocomotion(float DeltaSeconds);
+	virtual EBMLocoDirection UpdateCharacterLocoDirection(EBMLocoDirection CurLocoDirection, const float SpeedAngle);
 	
 protected:
 	UPROPERTY()
@@ -41,23 +45,20 @@ protected:
 	UPROPERTY()
 	UBMAnimStateComponent* AnimStateComponent = nullptr;
 	UPROPERTY()
-	UBMRootMotionComponent* RootMotionComponent = nullptr;
+	UAnimInstance* MainAnimInstance = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category="State")
 	EBMCharacterGate CharacterGate = EBMCharacterGate::Walk;
 
 	UPROPERTY(BlueprintReadWrite, Category="State")
-	FName RootAnimTimeName = FName(TEXT("TimeSec"));
-
-	UPROPERTY(BlueprintReadWrite, Category="State")
-	UAnimSequence* RootAnimSequence = nullptr;
-
-	UPROPERTY(BlueprintReadOnly, Category="State")
-	float RootAnimTime = 0.0f;
-
-	FTransform RootMotionTransform;
+	bool bIsRootMotionActive = false;
 
 	// ~ Transform
+	FVector LastCharacterLocation = FVector::ZeroVector;
+	FVector CharacterLocation = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category="Transform")
+	float CharacterDeltaDistance = 0.0f;
+	
 	UPROPERTY(BlueprintReadOnly, Category="Transform")
 	FRotator CharacterRotation = FRotator::ZeroRotator;
 
@@ -74,7 +75,30 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category="Velocity")
 	FVector CharacterVelocity2D = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Velocity")
+	float CharacterVelocityAngle = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Velocity")
+	EBMLocoDirection CharacterLocoDirection = EBMLocoDirection::Forward;
 	// ~ End Speed
+
+	// ~ Acceleration
+	UPROPERTY(BlueprintReadOnly, Category="Acceleration")
+	float CharacterAccelerationSize = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Acceleration")
+	FVector CharacterAcceleration = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Acceleration")
+	FVector CharacterAcceleration2D = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Acceleration")
+	float CharacterAccelerationAngle = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Acceleration")
+	EBMLocoDirection CharacterAccelerationDirection = EBMLocoDirection::Forward;
+	// ~ End Acceleration
 
 	// ~ Turn
 	UPROPERTY(BlueprintReadWrite, Category="State")
@@ -82,17 +106,21 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, Category="Turn")
 	float RootYawOffset = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
-	float BackAngle = 160.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
-	float FrontAngle = 90.0f;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Turn")
 	EBMTurnType CharacterTurnType = EBMTurnType::None;
 
 	FFloatSpringState RootYawOffsetSpring;
 	// ~ End Turn
+
+	// ~ Locomotion
+
+	UPROPERTY(BlueprintReadOnly, Category="Locomotion")
+	FVector CharacterStopLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Locomotion")
+	FVector CharacterPivotLocation = FVector::ZeroVector;
+	// ~ End Locomotion
 
 	// ~ Animation Chooser Tables
 	// These tables are used to choose animations based on the current state of the character.
@@ -102,9 +130,43 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="AnimationChooserTable")
 	TObjectPtr<UChooserTable> TurnChooserTable;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="AnimationChooserTable")
+	TObjectPtr<UChooserTable> StartChooserTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="AnimationChooserTable")
+	TObjectPtr<UChooserTable> LoopChooserTable;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="AnimationChooserTable")
+	TObjectPtr<UChooserTable> StopChooserTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="AnimationChooserTable")
+	TObjectPtr<UChooserTable> JumpChooserTable;
+	
 	UPROPERTY()
 	UBMDebugAnimation* DebugAnimation;
 
+
+	// ~ Settings
+	UPROPERTY(BlueprintReadOnly, Category="Setting")
+	float ForwardDirectionMaxAngle = 45.f;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Setting")
+	float ForwardDirectionMinAngle = -45.f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Setting")
+	float BackwardDirectionMaxAngle = 135.f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Setting")
+	float BackwardDirectionMinAngle = -135.f;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Setting")
+	float CharacterDeadZone = 20.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
+	float TurnBackAngle = 160.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Turn")
+	float TurnFrontAngle = 90.0f;
+	// ~ End Settings
 private:
 	friend class UBMDebugAnimation;
 };
