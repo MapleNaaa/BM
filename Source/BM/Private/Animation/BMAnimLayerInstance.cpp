@@ -6,6 +6,7 @@
 #include "Animation/BMAnimInstance.h"
 #include "ChooserFunctionLibrary.h"
 #include "Animation/Debug/AnimDebug.h"
+#include "Player/Component/BMRootMotionComponent.h"
 #include "Net/UnrealNetwork.h"
 
 void UBMAnimLayerInstance::NativeInitializeAnimation()
@@ -18,6 +19,8 @@ void UBMAnimLayerInstance::NativeInitializeAnimation()
 	if (!IsValid(OwnerCharacter)) return;
 	AnimStateComponent = OwnerCharacter->FindComponentByClass<UBMAnimStateComponent>();
 	if (!IsValid(AnimStateComponent)) return;
+	RootMotionComponent = OwnerCharacter->FindComponentByClass<UBMRootMotionComponent>();
+	if (!IsValid(RootMotionComponent)) return;
 }
 
 void UBMAnimLayerInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -33,10 +36,22 @@ void UBMAnimLayerInstance::NativeUpdateAnimation(float DeltaSeconds)
 		AnimStateComponent = OwnerCharacter->FindComponentByClass<UBMAnimStateComponent>();
 		if (!IsValid(AnimStateComponent)) return;
 	};
+
+	UAnimInstance* MainAnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
+	if(RootAnimSequence)
+	{
+		MainAnimInstance->SetRootMotionMode(ERootMotionMode::Type::RootMotionFromEverything);
+		SetRootMotionMode(ERootMotionMode::Type::RootMotionFromEverything);
+	}else
+	{
+		MainAnimInstance->SetRootMotionMode(ERootMotionMode::Type::RootMotionFromMontagesOnly);
+		SetRootMotionMode(ERootMotionMode::Type::RootMotionFromMontagesOnly);
+	}
+	
 	
 	UpdateCharacterTurn(DeltaSeconds);
 
-	DebugAnimation->DebugFunc(this);
+	// DebugAnimation->DebugFunc(this);
 }
 
 void UBMAnimLayerInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
@@ -73,12 +88,12 @@ void UBMAnimLayerInstance::UpdateCharacterTurn(float DeltaSeconds)
 		float Offset = OwnerCharacter->GetActorRotation().Yaw - ControlRotation.Yaw;
 		RootYawOffset = UKismetMathLibrary::NormalizeAxis(Offset); 
 	}
-	/*else if(RootYawOffsetMode == EBMRootYawOffsetMode::BlendOut)
+	else if(RootYawOffsetMode == EBMRootYawOffsetMode::BlendOut)
 	{
 		float Tmp = UKismetMathLibrary::FloatSpringInterp(RootYawOffset, 0.f, RootYawOffsetSpring,
 			80,1, DeltaSeconds,1,0.5);
 		RootYawOffset = UKismetMathLibrary::NormalizeAxis(Tmp);
-	}*/
+	}
 
 	CharacterTurnType = EBMTurnType::None;
 	if(RootYawOffset > BackAngle)

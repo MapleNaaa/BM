@@ -28,18 +28,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RootMotion")
 	void ApplyFrameRootMotion(const FTransform& RootMotionDelta);
 
-	UFUNCTION(BlueprintCallable, Category = "RootMotion")
-	void EnableAutoExtractFromAnimation(bool bEnabled);
-
 	/** 获取是否启用 */
 	UFUNCTION(BlueprintPure, Category = "RootMotion")
 	bool IsRootMotionEnabled() const { return bIsEnabled; }
+
+	UFUNCTION(BlueprintCallable, Category = "RootMotion")
+	void SetRootMotionDelta(const FTransform& Delta) { RootMotionDelta = Delta; }
 	
 protected:
-
-	/** 从动画提取根运动 */
-	FTransform ExtractRootMotionFromAnimation();
-
+	
 	/** 在服务器上更新根运动 */
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerApplyRootMotion(const FTransform& RootMotion);
@@ -56,11 +53,11 @@ private:
 	/** 根运动源的共享指针 */
 	TSharedPtr<FRootMotionSource_TransformDelta> RootMotionSource;
 
+	/** 根运动源的实例名称 */
+	FTransform RootMotionDelta;
+
 	/** 是否启用根运动 */
 	bool bIsEnabled;
-
-	/** 是否自动从动画提取 */
-	bool bAutoExtractFromAnimation;
 
 	/** 根运动源的实例名称 */
 	FName RootMotionSourceName;

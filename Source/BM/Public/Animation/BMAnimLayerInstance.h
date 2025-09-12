@@ -8,6 +8,7 @@
 #include "ES/BMAnimationTypes.h"
 #include "ES/BMPlayerTypes.h"
 #include "Player/Character/BMPlayerCharacter.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "BMAnimLayerInstance.generated.h"
 
 class UBMDebugAnimation;
@@ -39,9 +40,22 @@ protected:
 	ABMPlayerCharacter* OwnerCharacter = nullptr;
 	UPROPERTY()
 	UBMAnimStateComponent* AnimStateComponent = nullptr;
+	UPROPERTY()
+	UBMRootMotionComponent* RootMotionComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category="State")
 	EBMCharacterGate CharacterGate = EBMCharacterGate::Walk;
+
+	UPROPERTY(BlueprintReadWrite, Category="State")
+	FName RootAnimTimeName = FName(TEXT("TimeSec"));
+
+	UPROPERTY(BlueprintReadWrite, Category="State")
+	UAnimSequence* RootAnimSequence = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category="State")
+	float RootAnimTime = 0.0f;
+
+	FTransform RootMotionTransform;
 
 	// ~ Transform
 	UPROPERTY(BlueprintReadOnly, Category="Transform")
@@ -76,6 +90,8 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, Category="Turn")
 	EBMTurnType CharacterTurnType = EBMTurnType::None;
+
+	FFloatSpringState RootYawOffsetSpring;
 	// ~ End Turn
 
 	// ~ Animation Chooser Tables

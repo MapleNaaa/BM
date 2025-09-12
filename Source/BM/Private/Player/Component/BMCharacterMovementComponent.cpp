@@ -23,7 +23,7 @@ FRootMotionSource_TransformDelta::FRootMotionSource_TransformDelta():
     Settings.SetFlag(ERootMotionSourceSettingsFlags::DisablePartialEndTick);
     
     // 使用Additive模式，完全替代其他根运动
-    AccumulateMode = ERootMotionAccumulateMode::Additive;
+    AccumulateMode = ERootMotionAccumulateMode::Override;
     
     // 设置高优先级
     Priority = 1000;
@@ -120,4 +120,3 @@ void UBMCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick Ti
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
-

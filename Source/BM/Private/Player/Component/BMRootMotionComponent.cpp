@@ -20,7 +20,6 @@ UBMRootMotionComponent::UBMRootMotionComponent()
     SetIsReplicated(true);
     
     bIsEnabled = false;
-    bAutoExtractFromAnimation = false;
     RootMotionSourceName = FName("CustomFrameRootMotion");
 }
 
@@ -33,6 +32,10 @@ void UBMRootMotionComponent::BeginPlay()
     if (OwnerCharacter)
     {
         MovementComponent = OwnerCharacter->GetCharacterMovement();
+        if(MovementComponent)
+        {
+            MovementComponent->AddTickPrerequisiteComponent(this);
+        }
     }
     
     if (!OwnerCharacter || !MovementComponent)
@@ -57,15 +60,12 @@ void UBMRootMotionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
         return;
     }
     
-    // 自动从动画提取根运动
-    if (bAutoExtractFromAnimation)
+    FTransform RootMotion = RootMotionDelta;
+    if (!RootMotion.Equals(FTransform::Identity))
     {
-        FTransform RootMotion = ExtractRootMotionFromAnimation();
-        if (!RootMotion.Equals(FTransform::Identity))
-        {
-            ApplyFrameRootMotion(RootMotion);
-        }
+        ApplyFrameRootMotion(RootMotion);
     }
+    
 }
 
 void UBMRootMotionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -92,7 +92,7 @@ void UBMRootMotionComponent::SetRootMotionEnabled(bool bEnabled)
     }
 }
 
-void UBMRootMotionComponent::ApplyFrameRootMotion(const FTransform& RootMotionDelta)
+void UBMRootMotionComponent::ApplyFrameRootMotion(const FTransform& RootMotion)
 {
     if (!bIsEnabled || !MovementComponent)
     {
@@ -111,56 +111,18 @@ void UBMRootMotionComponent::ApplyFrameRootMotion(const FTransform& RootMotionDe
         if (OwnerCharacter->GetLocalRole() == ROLE_Authority)
         {
             // 服务器：直接应用
-            ApplyRootMotionToMovement(RootMotionDelta);
+            ApplyRootMotionToMovement(RootMotion);
         }
         else if (OwnerCharacter->GetLocalRole() == ROLE_AutonomousProxy)
         {
             // 本地客户端：预测并发送到服务器
-            ApplyRootMotionToMovement(RootMotionDelta);
-            ServerApplyRootMotion(RootMotionDelta);
+            ApplyRootMotionToMovement(RootMotion);
+            ServerApplyRootMotion(RootMotion);
         }
         // SimulatedProxy会通过RootMotionSource自动同步
     }
 }
 
-void UBMRootMotionComponent::EnableAutoExtractFromAnimation(bool bEnable)
-{
-    bAutoExtractFromAnimation = bEnable;
-}
-
-FTransform UBMRootMotionComponent::ExtractRootMotionFromAnimation()
-{
-    if (!OwnerCharacter)
-    {
-        return FTransform::Identity;
-    }
-    
-    USkeletalMeshComponent* MeshComp = OwnerCharacter->GetMesh();
-    if (!MeshComp)
-    {
-        return FTransform::Identity;
-    }
-    
-    UAnimInstance* AnimInstance = MeshComp->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return FTransform::Identity;
-    }
-    
-    // 从动画实例提取根运动
-    // 注意：这需要动画蓝图中启用了根运动提取
-    FRootMotionMovementParams RootMotionParams = AnimInstance->ConsumeExtractedRootMotion(1.0f);
-    FTransform RootMotion = RootMotionParams.GetRootMotionTransform();
-    // FTransform RootMotion = FTransform::Identity;
-    // RootMotion.SetLocation(FVector(100.0f, 0.0f, 0.0f));
-
-    if(!RootMotion.Equals(FTransform::Identity))
-    {
-        UE_LOG(LogTemp, Log, TEXT("BMRootMotionComponent: Extracted RootMotion: %s"), *RootMotion.ToString());
-    }
-    
-    return RootMotion;
-}
 
 void UBMRootMotionComponent::InitializeRootMotionSource()
 {

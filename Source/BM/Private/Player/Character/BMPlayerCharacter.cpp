@@ -15,7 +15,7 @@ ABMPlayerCharacter::ABMPlayerCharacter(const FObjectInitializer& ObjectInitializ
 	
 	PrimaryActorTick.bCanEverTick = true;
 	// 创建根运动组件
-	RootMotionComponent = CreateDefaultSubobject<UBMRootMotionComponent>(TEXT("RootMotionComponent"));
+	// RootMotionComponent = CreateDefaultSubobject<UBMRootMotionComponent>(TEXT("RootMotionComponent"));
 	AnimStateComponent = CreateDefaultSubobject<UBMAnimStateComponent>(TEXT("AnimStateComponent"));
 }
 
@@ -35,8 +35,7 @@ void ABMPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	if (RootMotionComponent)
 	{
-		RootMotionComponent->SetRootMotionEnabled(true);
-		RootMotionComponent->EnableAutoExtractFromAnimation(true);
+		// RootMotionComponent->SetRootMotionEnabled(true);
 	}
 	
 }
