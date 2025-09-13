@@ -24,6 +24,8 @@ public:
 	
 	virtual void SetCharacterGate(EBMCharacterGate NewGate);
 	EBMCharacterGate GetCharacterGate() const { return CurrentCharacterGate; }
+	UFUNCTION()
+	void OnRep_CharacterGate();
 
 	TSubclassOf<UBMAnimLayerInstance> GetLinkAnimInstance() const { return LinkAnimInstance; }
 	
@@ -36,8 +38,8 @@ protected:
 protected:
 	
 	/** 根运动管理组件 */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UBMRootMotionComponent* RootMotionComponent;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UBMRootMotionComponent* RootMotionComponent;*/
 
 	/** 动画状态管理组件 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -46,7 +48,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Animation")
 	TSubclassOf<UBMAnimLayerInstance> LinkAnimInstance;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category="BM|Gate")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CharacterGate, Category="BM|Gate")
 	EBMCharacterGate CurrentCharacterGate = EBMCharacterGate::None;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BM|Gate")

@@ -41,6 +41,11 @@ void UBMAnimStateComponent::SetControlRotation(const FRotator& NewRotation)
 	Server_ControlRotation(NewRotation);
 }
 
+bool UBMAnimStateComponent::Server_ControlRotation_Validate(const FRotator& NewRotation)
+{
+	return true;
+}
+
 void UBMAnimStateComponent::Server_ControlRotation_Implementation(const FRotator& NewRotation)
 {
 	ControlRotation = NewRotation;

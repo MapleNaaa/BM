@@ -24,7 +24,7 @@ public:
 	FRotator GetControlRotation() const { return ControlRotation; }
 	
 protected:
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ControlRotation(const FRotator& NewRotation);
 	
 protected:

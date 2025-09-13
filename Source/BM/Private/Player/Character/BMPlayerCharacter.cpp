@@ -10,7 +10,7 @@
 
 
 ABMPlayerCharacter::ABMPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
-	Super(ObjectInitializer.SetDefaultSubobjectClass<UBMCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+	Super(ObjectInitializer)
 {
 	
 	PrimaryActorTick.bCanEverTick = true;
@@ -33,10 +33,10 @@ void ABMPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 void ABMPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (RootMotionComponent)
+	/*if (RootMotionComponent)
 	{
 		// RootMotionComponent->SetRootMotionEnabled(true);
-	}
+	}*/
 	SetCharacterGate(EBMCharacterGate::Walk);
 	
 }
@@ -44,6 +44,7 @@ void ABMPlayerCharacter::BeginPlay()
 void ABMPlayerCharacter::Server_CharacterGate_Implementation(EBMCharacterGate NewGate)
 {
 	CurrentCharacterGate = NewGate;
+	OnRep_CharacterGate();
 }
 
 void ABMPlayerCharacter::SetCharacterGate(EBMCharacterGate NewGate)
@@ -51,12 +52,16 @@ void ABMPlayerCharacter::SetCharacterGate(EBMCharacterGate NewGate)
 	if(CurrentCharacterGate == NewGate) return;
 	CurrentCharacterGate = NewGate;
 	
-	if(HasAuthority())
+	if(!HasAuthority())
 	{
 		Server_CharacterGate(NewGate);
 	}
-	
-	FBMCharacterGateSetting* GateSetting = CharacterGateSettings.Find(NewGate);
+	OnRep_CharacterGate();
+}
+
+void ABMPlayerCharacter::OnRep_CharacterGate()
+{
+	FBMCharacterGateSetting* GateSetting = CharacterGateSettings.Find(CurrentCharacterGate);
 	if(GateSetting == nullptr) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = GateSetting->MaxWalkSpeed;
